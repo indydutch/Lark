@@ -96,7 +96,8 @@ function birdbath() {
 				case "$command" in
 					"cat")
 						if [ "$location" == "birdbath" ]; then
-							if [ 1 == $((1 + RANDOM % 10)) ]; then									(( birdCount = $birdCount + 1 ))
+							if [ 1 == $((1 + RANDOM % 10)) ]; then									
+								(( birdCount = $birdCount + 1 ))
 								echo "You got a bird!"
 							else
 								echo "You did not get a bird."
