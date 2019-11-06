@@ -22,9 +22,15 @@ function makeGarden() {
 		case "$overwrite" in
 			y|Y)
 				rm -r $prefix
+				mkdir $prefix
 			;;
 			n|N)
 				read -p "Please enter a new save name: " prefix
+				if [ "$prefix" == "q" ] || [ "$prefix" == "Q" ]; then
+					exit
+				elif [ -d $prefix ]; then
+					break
+				fi
 				mkdir $prefix
 			;;
 			*)
@@ -35,20 +41,19 @@ function makeGarden() {
 		mkdir $prefix
 	fi
 
-	mkdir $prefix
 	mkdir $prefix/garden
 
 	trees=$((1 + RANDOM % 5))
 	nestCount=0
 	branchCount=0
 	#Trees
-	for((t = 0; t < trees; t++)); do
+	for((t = 1; t <= trees; t++)); do
 		mkdir $prefix/garden/tree$t
 		branch1=$((1 + RANDOM % 5))
-		for((b1 = 0; b1 < branch1; b1++)); do
+		for((b1 = 1; b1 <= branch1; b1++)); do
 			mkdir $prefix/garden/tree$t/branch$b1
 			branch2=$((1 + RANDOM % 5))
-			for((b2 = 0; b2 < branch2; b2++)); do
+			for((b2 = 1; b2 <= branch2; b2++)); do
 				mkdir $prefix/garden/tree$t/branch$b1/branch$b2
 				nest=$((1 + RANDOM % 10))
 				(( branchCount = $branchCount + 1 ))
@@ -58,26 +63,53 @@ function makeGarden() {
 					touch $prefix/garden/tree$t/branch$b1/branch$b2/nest
 					echo "BIRD!" > $prefix/garden/tree$t/branch$b1/branch$b2/nest
 					nestArray[$nestCount]="$prefix/garden/tree$t/branch$b1/branch$b2/nest"
-					nestIntCount[$nestCount]=$(( trees * 1000 + branch1 * 100 + branch2 * 10 + 1 ))
-					echo "$nestIntCount[$nestCount]"
+					nestIntCount[$nestCount]=$(( t * 1000 + b1 * 100 + b2 * 10 + 1 ))
 				fi
 			done
 		done
 	done
+	echo "${nestIntCount[*]}"
 }
 brk=false
 
 function birdbath() {
+	clear
 	echo "This aquatic garden attraction offers water to drink and the potential to catch a dumb bird."
-	select option in drink wait; do
+	select option in drink wait leave Quit; do
 		case "$option" in
 			"drink")
 			;;
 			"wait")
-				clear
-				
+				for(( ; ; )); do
+					read -p "${BLINK}waiting...${NORMAL} " command location
+					sleep 3
+					case "$command" in
+						"cat")
+							if [ $location == "birdbath" ]; then
+
+								if [ 1 == $((1 + RANDOM % 10)) ]; then
+									(( birdCount = $birdCount + 1 ))
+									echo "You got a bird!"
+								else
+									echo "You did not get a bird."
+								fi
+							else
+								echo "You knocked over the bird bath and scared away the bird!"
+							fi
+							break 2
+						;;
+						"leave")
+							break 2
+						;;
+						q|Q)
+							exit
+						;;
+						*)
+						;;
+					esac
+				done
 			;;
-			q|Q)
+			"Quit")
 				exit
 			;;
 			*)
@@ -88,13 +120,17 @@ function birdbath() {
 }
 
 #user start
-select option in play readme; do
+select option in play readme Quit; do
 	case $option in
 		"play")
+			birdCount=0
 			break
 		;;
 		"readme")
 			cat readme
+		;;
+		"Quit")
+			exit
 		;;
 		*)
 		;;
@@ -136,12 +172,11 @@ while [ "$hasFolder" == "false" ]; do
 			exit
 		;;
 		*)
-			echo "Not a valid option, please try again."
 		;;
 	esac
 done
 
-for((i = 1; i < 15; i++)); do
+for ((i = 1 ; i < 15 ; i++)); do
 	if [ $i == 1 ]; then
 		clear
 		read -p "I see this is your first day, would you like to go through the tutorial? (y/n) " tutorial
@@ -156,10 +191,10 @@ for((i = 1; i < 15; i++)); do
 				echo "If another cat tells you there's a nest on a certain branch, try checking to see if it's ${GREEN}-a${NC} hidden nest."
 				echo "You can also check ${GREEN}-al${NC}l of a locations properties."
 				echo "You can also try going to the birdbath to drink water or wait for a bird to stop for a bath."
-				break
+				echo
+				cont
 			;;
 			n|N)
-				break
 			;;
 			q|Q)
 				exit
@@ -168,9 +203,9 @@ for((i = 1; i < 15; i++)); do
 			;;
 		esac
 	fi
-	echo "${BOLD}Day $i${NORMAL}"
 	clear
-	select option in Maximus Cat2 Cat3 Cat4 Cat5 Cat6 Cat7 Cat8 Cat9 Birdbath; do
+	echo "${BOLD}Day $i${NORMAL}"
+	select option in Maximus Cat2 Cat3 Cat4 Cat5 Cat6 Cat7 Cat8 Cat9 Birdbath Quit; do
 		case $option in
 			"Maximus")
 				break
@@ -200,9 +235,10 @@ for((i = 1; i < 15; i++)); do
 				break
 			;;
 			"Birdbath")
+				birdbath
 				break
 			;;
-			q|Q)
+			"Quit")
 				exit
 			;;
 			*)
