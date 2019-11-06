@@ -10,6 +10,15 @@ BLINK=$(tput blink)
 
 clear
 
+function attack() {
+	clear
+	echo -e "${BLINK}stalking...${NORMAL}"
+	sleep 3
+	clear
+	echo -e "${BLINK}pouncing...${NORMAL}"
+	sleep 1
+}
+
 function cont() {
 	echo
 	read -p "Press enter to continue..."
@@ -78,36 +87,35 @@ function birdbath() {
 	select option in drink wait leave Quit; do
 		case "$option" in
 			"drink")
+				echo "You take a sip of the stagnant water and think you just got a new parasite."
+				break
 			;;
 			"wait")
-				for(( ; ; )); do
-					read -p "${BLINK}waiting...${NORMAL} " command location
-					sleep 3
-					case "$command" in
-						"cat")
-							if [ $location == "birdbath" ]; then
-
-								if [ 1 == $((1 + RANDOM % 10)) ]; then
-									(( birdCount = $birdCount + 1 ))
-									echo "You got a bird!"
-								else
-									echo "You did not get a bird."
-								fi
+				read -p ": " command location
+				attack
+				case "$command" in
+					"cat")
+						if [ "$location" == "birdbath" ]; then
+							if [ 1 == $((1 + RANDOM % 10)) ]; then									(( birdCount = $birdCount + 1 ))
+								echo "You got a bird!"
 							else
-								echo "You knocked over the bird bath and scared away the bird!"
+								echo "You did not get a bird."
 							fi
-							break 2
-						;;
-						"leave")
-							break 2
-						;;
-						q|Q)
-							exit
-						;;
-						*)
-						;;
-					esac
-				done
+						else
+							echo "You knocked over the bird bath and scared away the bird!"
+						fi
+						break
+					;;
+					q|Q)
+						exit
+					;;
+					*)
+					;;
+				esac
+			;;
+			"leave")
+				echo "No birds today. You leave disappointed."
+				break
 			;;
 			"Quit")
 				exit
@@ -206,7 +214,7 @@ for ((i = 1 ; i < 15 ; i++)); do
 	clear
 	echo "${BOLD}Day $i${NORMAL}"
 	select option in Maximus Cat2 Cat3 Cat4 Cat5 Cat6 Cat7 Cat8 Cat9 Birdbath Quit; do
-		case $option in
+		case "$option" in
 			"Maximus")
 				break
 			;;
